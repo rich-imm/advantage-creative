@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>{{ embeddedAsset.title }}</title>
+	{% set previewJs = view.getAssetManager().getPublishedUrl('@spicyweb/embeddedassets/resources/preview.js', true) %}
+	<script src="{{ previewJs }}"></script>
+	{% if callback is defined and callback %}
+		<script>EmbeddedAssetsPreview.addCallback('{{ callback|e('js') }}')</script>
+	{% endif %}
+</head>
+<body>
+
+	{% if embeddedAsset.isSafe() and embeddedAsset.code %}
+
+		{% if embeddedAsset.aspectRatio %}
+			<div id="code" class="code is-ratio" style="padding-top: {{ min(embeddedAsset.aspectRatio, 75) }}%">
+				{{ embeddedAsset.code }}
+			</div>
+		{% else %}
+			<div id="code" class="code">
+				{{ embeddedAsset.code }}
+			</div>
+		{% endif %}
+
+	{% elseif embeddedAsset.image and (embeddedAsset.imageWidth >= 400 or embeddedAsset.imageHeight >= 200) %}
+
+		<div class="image">
+			<img src="{{ embeddedAsset.image }}" width="{{ embeddedAsset.imageWidth }}" height="{{ embeddedAsset.imageHeight }}">
+		</div>
+
+	{% endif %}
+
+	{% if showContent %}
+
+		<div class="content">
+			<h1>{{ embeddedAsset.title|default(embeddedAsset.url) }}</h1>
+			{% if embeddedAsset.description %}
+				<p>{{ embeddedAsset.description }}</p>
+			{% endif %}
+			<ul>
+				{% if embeddedAsset.providerName %}
+					<li>
+						{% set providerIcon = embeddedAsset.getProviderIconToSize(32) %}
+						{% if providerIcon %}
+							<img src="{{ providerIcon.url }}" width="{{ providerIcon.width }}" height="{{ providerIcon.height }}">
+						{% endif %}
+						{% if embeddedAsset.providerUrl %}
+							<a href="{{ embeddedAsset.providerUrl }}" target="_blank" rel="noopener">
+								{{ embeddedAsset.providerName }}
+							</a>
+						{% else %}
+							{{ embeddedAsset.providerName }}
+						{% endif %}
+					</li>
+				{% endif %}
+				{% if embeddedAsset.type %}
+					<li>{{ embeddedAsset.type|ucfirst }}</li>
+				{% endif %}
+				{% if not embeddedAsset.isSafe() %}
+					<li><i id="warning" class="warning"></i></li>
+				{% endif %}
+			</ul>
+		</div>
+
+	{% endif %}
+
+	<script>EmbeddedAssetsPreview.applyRatio(document.getElementById('code'))</script>
+
+</body>
+</html>
